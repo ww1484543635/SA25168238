@@ -1,0 +1,62 @@
+---
+title: "Research functions: CvM test + RW-MH (Rcpp)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Research functions: CvM test + RW-MH (Rcpp)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse=TRUE, comment="#>")
+set.seed(2025)
+library(SA25168238)
+library(microbenchmark)
+```
+
+## Background
+
+This vignette documents two functions added for the final project.
+
+1) `cvm_perm_test_1014()` implements the two-sample Cramér–von Mises statistic
+(Eq. 10.14) using pooled ranks (average ties) and computes a permutation p-value
+by re-labeling the pooled sample.
+
+2) `rw_mh_theta_cpp()` implements a random-walk Metropolis sampler for the posterior
+distribution of theta in Exercise 11.8. The core MH loop is implemented in Rcpp
+for speed.
+
+## Guidelines
+
+### CvM permutation test
+- Use `B >= 999` for quick checks; increase `B` (e.g., 4999 or 9999) for a more stable p-value.
+- The returned p-value is a right-tail permutation p-value based on the permutation distribution.
+
+### RW-MH sampler
+- Tune `w` so that the acceptance rate is roughly 0.2–0.6.
+- Always discard a burn-in period before summarizing the posterior.
+- Thinning is optional; only use it when you need to reduce storage.
+
+## 1. CvM permutation test (Eq. 10.14)
+
+```{r}
+x <- rnorm(20); y <- rnorm(25, 0.5)
+cvm_perm_test_1014(x, y, B = 999)
+```
+
+## 2. RW-MH sampler (Rcpp, Exercise 11.8)
+
+```{r}
+k <- c(125, 18, 20, 34)
+out <- rw_mh_theta_cpp(k, m = 5000, w = 0.10, x0 = 0.50, burn = 500, thin = 2)
+c(mean = mean(out$chain), accept = out$accept_rate)
+```
+
+## 3. Speed (small benchmark)
+
+```{r}
+microbenchmark(
+  cpp = rw_mh_theta_cpp(k, m = 3000, w = 0.10, x0 = 0.50),
+  times = 10L
+)
+```

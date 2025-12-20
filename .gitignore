@@ -1,0 +1,10 @@
+inst/doc
+/doc/
+/Meta/
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.tar.gz
+*.zip
+.DS_Store

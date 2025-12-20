@@ -1,0 +1,27 @@
+Package: SA25168238
+Type: Package
+Title: Homework Package with Vignettes and Rcpp
+Version: 0.0.1
+Authors@R: person("wang wei", email = "1484543635@qq.com", role = c("aut", "cre"))
+Description: This package collects homework answers as vignettes and provides
+    two research functions implemented in R and Rcpp. The package includes a
+    permutation Cramer-von Mises test and a random-walk Metropolis sampler.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    Rcpp
+LinkingTo:
+    Rcpp
+Suggests:
+    boot,
+    bootstrap,
+    lpSolve,
+    rbenchmark,
+    knitr,
+    rmarkdown,
+    microbenchmark
+VignetteBuilder: knitr
+RoxygenNote: 7.3.3
+URL: http://github.com/ww1484543635/R-package
+BugReports: http://github.com/ww1484543635/R-package/issues
