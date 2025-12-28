@@ -11,8 +11,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // rw_mh_theta_cpp_impl
-List rw_mh_theta_cpp_impl(IntegerVector k, int m, double w, double x0);
-RcppExport SEXP _SA25168238_rw_mh_theta_cpp_impl(SEXP kSEXP, SEXP mSEXP, SEXP wSEXP, SEXP x0SEXP) {
+List rw_mh_theta_cpp_impl(IntegerVector k, int m, double w, double x0, int L);
+RcppExport SEXP _SA25168238_rw_mh_theta_cpp_impl(SEXP kSEXP, SEXP mSEXP, SEXP wSEXP, SEXP x0SEXP, SEXP LSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -20,13 +20,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type m(mSEXP);
     Rcpp::traits::input_parameter< double >::type w(wSEXP);
     Rcpp::traits::input_parameter< double >::type x0(x0SEXP);
-    rcpp_result_gen = Rcpp::wrap(rw_mh_theta_cpp_impl(k, m, w, x0));
+    Rcpp::traits::input_parameter< int >::type L(LSEXP);
+    rcpp_result_gen = Rcpp::wrap(rw_mh_theta_cpp_impl(k, m, w, x0, L));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_SA25168238_rw_mh_theta_cpp_impl", (DL_FUNC) &_SA25168238_rw_mh_theta_cpp_impl, 4},
+    {"_SA25168238_rw_mh_theta_cpp_impl", (DL_FUNC) &_SA25168238_rw_mh_theta_cpp_impl, 5},
     {NULL, NULL, 0}
 };
 

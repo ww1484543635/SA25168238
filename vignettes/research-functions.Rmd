@@ -1,14 +1,14 @@
 ---
-title: "Research functions: CvM test + RW-MH (Rcpp)"
+title: "Research functions: CvM test + HMC (Rcpp)"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Research functions: CvM test + RW-MH (Rcpp)}
+  %\VignetteIndexEntry{Research functions: CvM test + HMC (Rcpp)}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(collapse=TRUE, comment="#>")
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 set.seed(2025)
 library(SA25168238)
 library(microbenchmark)
@@ -22,33 +22,41 @@ This vignette documents two functions added for the final project.
 (Eq. 10.14) using pooled ranks (average ties) and computes a permutation p-value
 by re-labeling the pooled sample.
 
-2) `rw_mh_theta_cpp()` implements a random-walk Metropolis sampler for the posterior
-distribution of theta in Exercise 11.8. The core MH loop is implemented in Rcpp
-for speed.
+2) `rw_mh_theta_cpp()` samples `theta` in Exercise 11.8 using Hamiltonian Monte Carlo (HMC).
+To avoid boundary issues of `theta in (0,1)`, the sampler uses a logit transform
+internally and runs HMC on the real line. The core HMC loop (leapfrog + accept/reject)
+is implemented in Rcpp for speed.
 
 ## Guidelines
 
 ### CvM permutation test
-- Use `B >= 999` for quick checks; increase `B` (e.g., 4999 or 9999) for a more stable p-value.
-- The returned p-value is a right-tail permutation p-value based on the permutation distribution.
 
-### RW-MH sampler
-- Tune `w` so that the acceptance rate is roughly 0.2–0.6.
-- Always discard a burn-in period before summarizing the posterior.
-- Thinning is optional; only use it when you need to reduce storage.
+- Use `B >= 999` for quick checks; increase `B` (e.g., 4999 or 9999) for a more stable p-value.
+- T）文档/小册he returned p-value is a right-tail permutation p-value based on the permutation distribution.
+
+### HMC sampler (Exercise 11.8)
+
+- `w` is the HMC step size (epsilon). If acceptance is too low, decrease `w`;
+  if it is too high, you can slightly increase `w`.
+- `L` is the number of leapfrog steps. Larger `L` usually moves farther but costs more time per iteration.
+- Always discard a burn-in period before summarizing the posterior. Thinning is optional.
 
 ## 1. CvM permutation test (Eq. 10.14)
 
 ```{r}
-x <- rnorm(20); y <- rnorm(25, 0.5)
+x <- rnorm(20)
+y <- rnorm(25, 0.5)
 cvm_perm_test_1014(x, y, B = 999)
 ```
 
-## 2. RW-MH sampler (Rcpp, Exercise 11.8)
+## 2. HMC sampler for theta (Rcpp, Exercise 11.8)
 
 ```{r}
 k <- c(125, 18, 20, 34)
-out <- rw_mh_theta_cpp(k, m = 5000, w = 0.10, x0 = 0.50, burn = 500, thin = 2)
+
+# A stable starting setting:
+out <- rw_mh_theta_cpp(k, m = 5000, w = 0.03, L = 15, x0 = 0.50, burn = 500, thin = 2)
+
 c(mean = mean(out$chain), accept = out$accept_rate)
 ```
 
@@ -56,7 +64,7 @@ c(mean = mean(out$chain), accept = out$accept_rate)
 
 ```{r}
 microbenchmark(
-  cpp = rw_mh_theta_cpp(k, m = 3000, w = 0.10, x0 = 0.50),
+  cpp = rw_mh_theta_cpp(k, m = 3000, w = 0.03, L = 15, x0 = 0.50),
   times = 10L
 )
 ```

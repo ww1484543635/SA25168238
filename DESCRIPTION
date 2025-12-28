@@ -23,5 +23,3 @@ Suggests:
     microbenchmark
 VignetteBuilder: knitr
 RoxygenNote: 7.3.3
-URL: http://github.com/ww1484543635/SA25168238
-BugReports: http://github.com/ww1484543635/SA25168238/issues

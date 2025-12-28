@@ -2,50 +2,54 @@
 % Please edit documentation in R/rw_mh_theta_cpp.R
 \name{rw_mh_theta_cpp}
 \alias{rw_mh_theta_cpp}
-\title{Random-walk Metropolis sampler for theta (Rcpp version)}
+\title{HMC sampler for theta (Rcpp)}
 \usage{
-rw_mh_theta_cpp(k, m = 10000L, w = 0.1, x0 = 0.5, burn = 0L, thin = 1L)
+rw_mh_theta_cpp(
+  k,
+  m = 10000L,
+  w = 0.02,
+  x0 = 0.5,
+  L = 10L,
+  burn = 0L,
+  thin = 1L
+)
 }
 \arguments{
-\item{k}{Integer vector of length 4 (counts).}
+\item{k}{Integer vector of length 4, the observed counts \code{(k1,k2,k3,k4)}.}
 
-\item{m}{Integer, total iterations (including burn-in).}
+\item{m}{Integer, total number of iterations (including burn-in).}
 
-\item{w}{Numeric, proposal half-width.}
+\item{w}{Numeric, HMC step size (epsilon). Smaller values are more stable but slower.}
 
-\item{x0}{Numeric, initial value in (0,1).}
+\item{x0}{Numeric, initial value of theta in (0,1).}
 
-\item{burn}{Integer, burn-in iterations to drop from the start.}
+\item{L}{Integer, number of leapfrog steps per iteration.}
+
+\item{burn}{Integer, number of burn-in iterations removed from the start.}
 
 \item{thin}{Integer, keep every \code{thin}-th draw after burn-in.}
 }
 \value{
 A list with:
 \itemize{
-  \item \code{chain}: numeric vector of posterior draws after burn-in/thinning.
-  \item \code{accept_rate}: acceptance rate computed on the full chain (before thinning).
+  \item \code{chain}: numeric vector of posterior draws after burn-in and thinning.
+  \item \code{accept_rate}: acceptance rate of HMC proposals.
 }
 }
 \description{
-Random-walk Metropolis sampler for \eqn{\theta \in (0,1)} in the genetic linkage model
-(Exercise 11.8). Multinomial probabilities are
+This function generates samples of \eqn{\theta \in (0,1)} for the genetic linkage
+example (Exercise 11.8). The posterior is proportional to a multinomial likelihood
+with probabilities
 \eqn{(1/2 + \theta/4,\ (1-\theta)/4,\ (1-\theta)/4,\ \theta/4)}.
-Proposal: \eqn{\theta' = \theta + U(-w,w)}. Proposals outside (0,1) are rejected.
 }
 \details{
-This function calls a compiled C++ routine (\code{rw_mh_theta_cpp_impl}) for speed.
-The returned draws are post burn-in and optionally thinned.
-
-Practical guidelines:
-\itemize{
-  \item Tune \code{w} so that \code{accept_rate} is roughly 0.2--0.6.
-  \item Use a burn-in (e.g., 500--2000) before computing posterior summaries.
-  \item Thinning is optional; only use it when you need to reduce storage.
-}
+Compared with a simple random-walk MH, HMC uses gradient information to propose
+larger moves with a high acceptance rate. Internally we use a logit transform
+\eqn{z=\log(\theta/(1-\theta))} so the algorithm runs on the real line.
 }
 \examples{
 k <- c(125, 18, 20, 34)
-out <- rw_mh_theta_cpp(k, m = 5000, w = 0.10, x0 = 0.50, burn = 500, thin = 2)
+out <- rw_mh_theta_cpp(k, m = 2000, w = 0.03, L = 15, burn = 200, thin = 2)
 mean(out$chain)
 out$accept_rate
 
